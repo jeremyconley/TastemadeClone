@@ -11,10 +11,15 @@ import AVFoundation
 import AVKit
 
 
-class TodayViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class TodayViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
 
     @IBOutlet weak var tableView: UITableView!
+    var selectedCellImg = UIImageView()
+    
     var posts = [TodayPost]()
+    
+    //Video
+    let avControl = AVPlayerViewController()
     
     //User Pics
     let scranImage = UIImage(named: "scranImg.jpg")
@@ -44,16 +49,8 @@ class TodayViewController: UIViewController, UITableViewDataSource, UITableViewD
         tableView.showsVerticalScrollIndicator = false
         createRandPosts()
         
-        /*
-        let videoURL = NSURL(string: "http://www.sabwap.com/video/-UvbgTNmXCE/chicken-recipes-how-to-make-quick-and-easy-chicken.mp4")
-        let player = AVPlayer(url: videoURL! as URL)
-        let playerLayer = AVPlayerLayer(player: player)
-        playerLayer.frame = self.view.bounds
-        self.view.layer.addSublayer(playerLayer)
-        player.play()
-        */
+        self.addChildViewController(avControl)
         
-        //tableView.indexPathsForVisibleRows
 
         // Do any additional setup after loading the view.
     }
@@ -94,6 +91,7 @@ class TodayViewController: UIViewController, UITableViewDataSource, UITableViewD
         let description = cell.contentView.viewWithTag(3) as! UILabel
         let userPicture = cell.contentView.viewWithTag(4) as! UIImageView
         let userName = cell.contentView.viewWithTag(5) as! UILabel
+        let watchLabel = cell.contentView.viewWithTag(6) as! UILabel
         
         //Set cell items to current post
         let post = posts[indexPath.row]
@@ -103,11 +101,33 @@ class TodayViewController: UIViewController, UITableViewDataSource, UITableViewD
         userPicture.image = post.userPic
         userPicture.layer.cornerRadius = 25
         userPicture.layer.masksToBounds = true
+        watchLabel.layer.cornerRadius = 15
+        watchLabel.layer.masksToBounds = true
         userName.text = post.user
         
         return cell
     }
     
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedCellImg.isHidden = false
+        let cell = self.tableView.cellForRow(at: indexPath as IndexPath)
+        let videoURL = NSURL(string: "https://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")
+        let player = AVPlayer(url: videoURL! as URL)
+        let currCellImg = cell?.contentView.viewWithTag(1) as! UIImageView
+        let viewSize:CGSize = currCellImg.frame.size
+        avControl.player = player
+        avControl.view.frame.size = CGSize(width: (cell?.frame.width)!, height: viewSize.height)
+        cell?.addSubview(avControl.view)
+        //cell?.bringSubview(toFront: avControl.view)
+        selectedCellImg = currCellImg
+        selectedCellImg.isHidden = true
+    }
+    
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        avControl.player?.pause()
+    }
     
 
     /*
